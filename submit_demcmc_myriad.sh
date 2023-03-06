@@ -43,4 +43,4 @@ python -m pip install --upgrade pip
 python -m pip install demcmc scipy multiprocessing-logging --upgrade
 
 date
-python $DEM_SCRIPT
+python "$DEM_SCRIPT"
