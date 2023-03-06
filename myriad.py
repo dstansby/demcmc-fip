@@ -2,6 +2,7 @@ from multiprocessing import Pool
 from pathlib import Path
 import os
 import logging
+from typing import Tuple
 
 from multiprocessing_logging import install_mp_handler
 
@@ -14,6 +15,9 @@ from demcmc.mcmc import predict_dem_emcee
 
 
 def get_cont_funcs(xpix: int, ypix: int):
+    """
+    Get contribution functions at a given pixel.
+    """
     data = cont_func_data["emissivity_array"][xpix, ypix].astype(float)
     lines = cont_func_data["lineid"].astype(str)
 
@@ -38,6 +42,9 @@ def parse_line(line: str) -> str:
 
 
 def get_lines(xpix: int, ypix: int):
+    """
+    Load contribution functions and observed intensities at a given pixel.
+    """
     cont_funcs = get_cont_funcs(xpix, ypix)
     lines = []
     for key in fip_lines.keys():
@@ -62,10 +69,16 @@ def get_lines(xpix: int, ypix: int):
 
 
 # DEM calculation
-def calc_dem(params) -> int:
+def calc_dem(params: Tuple[int, int]) -> int:
     """
-    params is a tuple of
-    (x coordinate, number of y coordinates)
+    Calculate the DEM.
+
+    Parameters
+    ----------
+    params : tuple[int, int]
+        Tuple containing:
+            - x coordinate
+            - number of y coordinates
     """
     xpix, len_y = params
     temp_bins = TempBins(10 ** np.arange(5.6, 6.8, 0.1) * u.K)
@@ -126,6 +139,6 @@ if __name__ == "__main__":
     logging.info(f"Processing {len(xys)} pixels...")
 
     with Pool(n_threads) as p:
-        p.map(calc_dem, xys)
+        p.map(calc_dem, params)
 
     logging.info("Finished processing pixels!")
