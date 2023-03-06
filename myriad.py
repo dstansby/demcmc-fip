@@ -25,6 +25,11 @@ n_threads = 36
 #
 # If not running on Myriad, `input_data_path` and `output_data_path`
 # can be set to different directories.
+#
+# The input data path should contain:
+#  - `emissivity.sav`: File containing pre-computed emissivity data.
+#  - `intensities.npy`: File containing observed intensities and intensity errors.
+#
 input_data_path = Path(__file__).parent / "data_in"
 scratch = Path(f"/scratch/scratch/{username}") / str(os.environ["JOB_ID"])
 scratch.mkdir(exist_ok=True)
@@ -117,7 +122,7 @@ def calc_dem(params: Tuple[int, int]) -> int:
 if __name__ == "__main__":
     # Setup logging
     logging.basicConfig(
-        filename=str(scratch / "demcmc.log"),
+        filename=str(output_data_path / "demcmc.log"),
         encoding="utf-8",
         level=logging.INFO,
         format="%(asctime)s %(message)s",
@@ -131,15 +136,13 @@ if __name__ == "__main__":
 
     # Load contribution function data
     logging.info("Loading contribution function data...")
-    cont_func_data = readsav(
-        str(input_data_path / "test_emissivity_13lines_demcmc.sav")
-    )
+    cont_func_data = readsav(str(input_data_path / "emissivity.sav"))
     cont_func_temps = np.logspace(4, 8, 401) * u.K
 
     # Load emission line data
     logging.info("Loading emission line data...")
     fip_lines = np.load(
-        (input_data_path / "FIP_lines_new.npy"), allow_pickle=True
+        (input_data_path / "intensities.npy"), allow_pickle=True
     ).tolist()
 
     # Get the map shape, and setup the parameters to run for each thread
