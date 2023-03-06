@@ -98,18 +98,21 @@ def calc_dem(params: Tuple[int, int]) -> int:
     temp_bins = TempBins(10 ** np.arange(5.6, 6.8, 0.1) * u.K)
 
     for ypix in np.arange(len_y):
+        savedir = output_data_path / f"dem_{xpix}_{ypix}.nc"
+        if savedir.exists():
+            logging.info(f"Already processed ({xpix}, {ypix})")
+            continue
+
         lines = get_lines(xpix, ypix)
         if not np.all(np.array([line.intensity_obs for line in lines]) > 0):
-            logging.info(f"Skipping ({xpix}, {ypix})")
-            return 0
-        logging.info(f"Processing pixel {xpix}, {ypix}")
+            logging.info(f"Skipping ({xpix}, {ypix}), some zero intensities")
+            continue
+
+        logging.info(f"Processing ({xpix}, {ypix})")
         dem_result = predict_dem_emcee(
             lines, temp_bins, nwalkers=200, nsteps=400, progress=False
         )
-
-    dem_result.save(output_data_path / f"dem_{xpix}_{ypix}.nc")
-    return 1
-
+        dem_result.save(output_data_path / f"dem_{xpix}_{ypix}.nc")
 
 if __name__ == "__main__":
     # Setup logging
