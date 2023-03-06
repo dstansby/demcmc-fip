@@ -10,6 +10,13 @@ DEM_SCRIPT = "/home/ucasdst/demcmc-fip/run_dem.py"
 # number (e.g. 18) to avoid a long wait in a the queue
 #
 #$ -pe smp 16
+#
+# Set the working directory to somewhere in your scratch space.
+# This is a necessary step as compute nodes cannot write to $HOME.
+#$ -wd /home/ucasdst/Scratch
+#################################
+# End of standard configuration #
+#################################
 
 # Request wallclock time (format hours:minutes:seconds).
 #$ -l h_rt=12:00:0
@@ -22,10 +29,6 @@ DEM_SCRIPT = "/home/ucasdst/demcmc-fip/run_dem.py"
 
 # Set the name of the job.
 #$ -N demcmc
-
-# Set the working directory to somewhere in your scratch space.
-# This is a necessary step as compute nodes cannot write to $HOME.
-#$ -wd /home/$(whoami)/Scratch
 
 
 # Your work should be done in $TMPDIR
