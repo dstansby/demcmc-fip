@@ -8,7 +8,7 @@ from scipy.io import readsav
 
 from demcmc import DEMOutput, ContFuncDiscrete, EmissionLine
 
-from .lib import parse_line
+from fiplib import parse_line
 
 cont_func_data = readsav("../data/test_emissivity_13lines_demcmc.sav")
 cont_func_temps = np.logspace(4, 8, 401) * u.K

@@ -13,7 +13,7 @@ from scipy.io import readsav
 from demcmc.emission import ContFuncDiscrete, EmissionLine, TempBins
 from demcmc.mcmc import predict_dem_emcee
 
-from .lib import parse_line
+from fiplib import parse_line
 
 #################
 # Configuration #
