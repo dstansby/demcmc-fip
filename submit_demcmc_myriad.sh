@@ -2,10 +2,11 @@
 
 # Change this to point to the location of the DEM script
 DEM_SCRIPT = "/home/ucasdst/fip/run_dem.py"
-# Change this to set the number of cores requested. Max
+# Change the next line to set the number of cores. Max
 # on Myriad is 36, but much easier to set to a lower
 # number (e.g. 18) to avoid a long wait in a the queue
-N_CORES = "16"
+#
+#$ -pe smp 16
 
 # Request wallclock time (format hours:minutes:seconds).
 #$ -l h_rt=12:00:0
@@ -15,9 +16,6 @@ N_CORES = "16"
 
 # Request TMPDIR space (default is 10 GB - remove if cluster is diskless)
 #$ -l tmpfs=10G
-
-# Request cores
-#$ -pe smp $N_CORES
 
 # Set the name of the job.
 #$ -N demcmc
