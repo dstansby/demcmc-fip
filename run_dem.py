@@ -13,6 +13,8 @@ from scipy.io import readsav
 from demcmc.emission import ContFuncDiscrete, EmissionLine, TempBins
 from demcmc.mcmc import predict_dem_emcee
 
+from .lib import parse_line
+
 #################
 # Configuration #
 #################
@@ -30,7 +32,7 @@ n_threads = 18
 #  - `intensities.npy`: File containing observed intensities and intensity errors.
 #
 input_data_path = Path(__file__).parent / "data_in"
-username = "ucasdst" # UCL username
+username = "ucasdst"  # UCL username
 scratch = Path(f"/scratch/scratch/{username}") / str(os.environ["JOB_ID"])
 scratch.mkdir(exist_ok=True)
 output_data_path = scratch
@@ -51,16 +53,6 @@ def get_cont_funcs(xpix: int, ypix: int):
         )
 
     return cont_funcs
-
-
-def parse_line(line: str) -> str:
-    line = line.replace("_int", "")
-    line_split = line.split("_")
-    line_split[0] = line_split[0].capitalize()
-    line_split[1] = line_split[1].upper()
-
-    line_str = f"{line_split[0]} {line_split[1]} {line_split[2]}.{line_split[3]}"
-    return line_str
 
 
 def get_lines(xpix: int, ypix: int):
