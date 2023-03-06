@@ -40,8 +40,7 @@ source ./fipenv/bin/activate
 
 which python
 python -m pip install --upgrade pip
-python -m pip install /home/ucasdst/fip/demcmc
-python -m pip install scipy multiprocessing-logging
+python -m pip install demcmc scipy multiprocessing-logging --upgrade
 
 date
 python $DEM_SCRIPT
