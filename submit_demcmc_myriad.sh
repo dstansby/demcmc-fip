@@ -3,8 +3,6 @@
 #################
 # Configuration #
 #################
-# Change this to point to the location of the DEM script
-DEM_SCRIPT = "/home/ucasdst/demcmc-fip/run_dem.py"
 # Change the next line to set the number of cores. Max
 # on Myriad is 36, but much easier to set to a lower
 # number (e.g. 18) to avoid a long wait in a the queue
@@ -43,4 +41,5 @@ python -m pip install --upgrade pip
 python -m pip install demcmc scipy multiprocessing-logging --upgrade
 
 date
-python "$DEM_SCRIPT"
+# Set this to the locaiton of the dem script
+python /home/ucasdst/demcmc-fip/run_dem.py
