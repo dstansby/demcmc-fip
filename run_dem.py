@@ -13,14 +13,13 @@ from scipy.io import readsav
 from demcmc.emission import ContFuncDiscrete, EmissionLine, TempBins
 from demcmc.mcmc import predict_dem_emcee
 
-# Configuration
-#
-# UCL username
-username = "ucasdst"
+#################
+# Configuration #
+#################
 # Number of threads to run in parallel.
 #
-# This should be the same as the number of cores requested from Myraid
-n_threads = 36
+# This should be the same as the number of cores requested from Myriad
+n_threads = 18
 # Setup input and output data paths
 #
 # If not running on Myriad, `input_data_path` and `output_data_path`
@@ -31,6 +30,7 @@ n_threads = 36
 #  - `intensities.npy`: File containing observed intensities and intensity errors.
 #
 input_data_path = Path(__file__).parent / "data_in"
+username = "ucasdst" # UCL username
 scratch = Path(f"/scratch/scratch/{username}") / str(os.environ["JOB_ID"])
 scratch.mkdir(exist_ok=True)
 output_data_path = scratch
