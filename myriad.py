@@ -13,6 +13,23 @@ from scipy.io import readsav
 from demcmc.emission import ContFuncDiscrete, EmissionLine, TempBins
 from demcmc.mcmc import predict_dem_emcee
 
+# Configuration
+#
+# UCL username
+username = "ucasdst"
+# Number of threads to run in parallel.
+#
+# This should be the same as the number of cores requested from Myraid
+n_threads = 36
+# Setup input and output data paths
+#
+# If not running on Myriad, `input_data_path` and `output_data_path`
+# can be set to different directories.
+input_data_path = Path(__file__).parent / "data_in"
+scratch = Path(f"/scratch/scratch/{username}") / str(os.environ["JOB_ID"])
+scratch.mkdir(exist_ok=True)
+output_data_path = scratch
+
 
 def get_cont_funcs(xpix: int, ypix: int):
     """
@@ -98,9 +115,7 @@ def calc_dem(params: Tuple[int, int]) -> int:
 
 
 if __name__ == "__main__":
-    scratch = Path("/scratch/scratch/ucasdst") / str(os.environ["JOB_ID"])
-    scratch.mkdir(exist_ok=True)
-
+    # Setup logging
     logging.basicConfig(
         filename=str(scratch / "demcmc.log"),
         encoding="utf-8",
@@ -110,32 +125,32 @@ if __name__ == "__main__":
     )
     install_mp_handler()
 
+    # Prevent numpy from trying to multithread calculations
     os.environ["OMP_NUM_THREADS"] = "1"
-    input_data_path = Path(__file__).parent / "data_in"
-    output_data_path = scratch
-
-    n_threads = 36
     logging.info("Starting run_demcmc.py ...")
 
-    # Contribution functions
+    # Load contribution function data
     logging.info("Loading contribution function data...")
     cont_func_data = readsav(
         str(input_data_path / "test_emissivity_13lines_demcmc.sav")
     )
     cont_func_temps = np.logspace(4, 8, 401) * u.K
 
-    # Lines
+    # Load emission line data
     logging.info("Loading emission line data...")
     fip_lines = np.load(
         (input_data_path / "FIP_lines_new.npy"), allow_pickle=True
     ).tolist()
 
+    # Get the map shape, and setup the parameters to run for each thread
     map_shape = cont_func_data["emissivity_array"].shape[:2]
     x, y = np.meshgrid(np.arange(map_shape[0]), np.arange(map_shape[1]))
     xs, ys = x.ravel(), y.ravel()
     xys = [(x, y, i, len(xs)) for i, (x, y) in enumerate(zip(xs, ys))]
 
+    # Each thread runs at a single x pixel, and runs through all y pixels
     params = [(x, map_shape[1]) for x in np.arange(map_shape[0])]
+
     logging.info(f"Processing {len(xys)} pixels...")
 
     with Pool(n_threads) as p:
