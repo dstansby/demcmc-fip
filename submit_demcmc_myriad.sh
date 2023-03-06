@@ -1,7 +1,10 @@
 #!/bin/bash -l
 
+#################
+# Configuration #
+#################
 # Change this to point to the location of the DEM script
-DEM_SCRIPT = "/home/ucasdst/fip/run_dem.py"
+DEM_SCRIPT = "/home/ucasdst/demcmc-fip/run_dem.py"
 # Change the next line to set the number of cores. Max
 # on Myriad is 36, but much easier to set to a lower
 # number (e.g. 18) to avoid a long wait in a the queue
