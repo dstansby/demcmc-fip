@@ -1,3 +1,6 @@
 .mypy_cache
 .ruff_cache
 *.nc
+*.sav
+*.npy
+*.DS_Store
