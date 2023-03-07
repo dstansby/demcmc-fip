@@ -7,7 +7,7 @@
 # on Myriad is 36, but much easier to set to a lower
 # number (e.g. 18) to avoid a long wait in a the queue
 #
-#$ -pe smp 16
+#$ -pe smp 18
 #
 # Set the working directory to somewhere in your scratch space.
 # This is a necessary step as compute nodes cannot write to $HOME.
