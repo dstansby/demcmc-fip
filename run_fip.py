@@ -10,7 +10,19 @@ from demcmc import DEMOutput, ContFuncDiscrete, EmissionLine
 
 from fiplib import parse_line
 
-cont_func_data = readsav("../data/test_emissivity_13lines_demcmc.sav")
+#################
+# Configuration #
+#################
+# The input data path should contain:
+#  - `emissivity.sav`: File containing pre-computed emissivity data.
+#  - `intensities.npy`: File containing observed intensities and intensity errors.
+#
+input_data_path = Path(__file__).parent / "data_in"
+# The DEM data path should contain the .nc files with the DEMs
+dem_path = Path(__file__).parent / "dems"
+
+fip_lines = np.load(input_data_path / "intensities.npy", allow_pickle=True).tolist()
+cont_func_data = readsav(str(input_data_path / "emissivity.sav"))
 cont_func_temps = np.logspace(4, 8, 401) * u.K
 
 
@@ -28,10 +40,10 @@ def get_cont_funcs(xpix: int, ypix: int):
     return cont_funcs
 
 
-fip_lines = np.load("../data/FIP_lines_new.npy", allow_pickle=True).tolist()
-
-
 def get_lines(xpix: int, ypix: int):
+    """
+    Load all non-Fe lines at a given pixel.
+    """
     cont_funcs = get_cont_funcs(xpix, ypix)
     lines = {}
     for key in fip_lines.keys():
@@ -39,6 +51,7 @@ def get_lines(xpix: int, ypix: int):
             continue
 
         line_name = parse_line(key)
+        # Only load non Fe lines
         if "Fe" in line_name:
             continue
         intensity = fip_lines[key][xpix, ypix]
@@ -61,16 +74,19 @@ fip_array = np.zeros(map_shape) * np.nan
 
 xs, ys = xys[0].ravel(), xys[1].ravel()
 for x, y in tqdm.tqdm(zip(xs, ys), total=len(xs)):
-    fname = Path(f"~/Downloads/dems/dem_{x}_{y}.nc").expanduser()
+    fname = dem_path / f"dem_{x}_{y}.nc"
     if not fname.exists():
         continue
     if np.isfinite(fip_array[x, y]):
         continue
     dem = DEMOutput.load(fname)
     lines = get_lines(x, y)
-    if not np.all(np.array([l.intensity_obs for l in lines.values()]) > 0):
+    if not np.all(np.array([line.intensity_obs for line in lines.values()]) > 0):
+        # Either Si or S line has zero intensity
         continue
 
+    # Iterate through all the DEM samples, and calculate the FIP bias
+    # for each sample
     fips = []
     for sample in dem.iter_binned_dems():
         I_pred = lines["Si"].I_pred(sample)
@@ -83,6 +99,10 @@ for x, y in tqdm.tqdm(zip(xs, ys), total=len(xs)):
     if not len(fips):
         continue
 
+    # Take the mean of all the sampled FIP biases. Could take another
+    # measure here (e.g. the median), or save the whole sample set,
+    # or calculate the standard deviation of samples (or something
+    # else I haven't thought of!)
     fip_array[x, y] = np.mean(fips)
 
 np.save("fip_array.npy", fip_array)
