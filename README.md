@@ -22,7 +22,7 @@ Then `run_dem.py` runs the DEM calculation. Two things need to be configured at 
   - The input and output data directories.
 Running this script will output progress to a log file in the output directory.
 Processing of the DEM for each pixel will happen independently and in parallel.
-When a pixel is processed the DEM will be output to a netCDF file called `dem_x_y.nc`, where x and y are numbers that give the x and y pixel of that DEM.
+When a whole row of pixels is processed the DEMs will be output to a netCDF file called `dem_x.nc`, where x is the number that gives the x-pixel of the row that contains DEMs for all y-pixels.
 
 ### Calculating FIP biases
 `run_fip.py` runs the FIP esitmation, using the DEMs calculated in the previous step.
