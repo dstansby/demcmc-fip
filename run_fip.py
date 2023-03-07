@@ -1,11 +1,13 @@
 from pathlib import Path
+import logging
 
 import numpy as np
 import tqdm
-import logging
 
 import astropy.units as u
+from eispac import read_cube
 from scipy.io import readsav
+from sunpy.map import Map
 
 from demcmc import DEMOutput, ContFuncDiscrete, EmissionLine
 
@@ -19,6 +21,7 @@ from fiplib import parse_line
 #  - `intensities.npy`: File containing observed intensities and intensity errors.
 #
 input_data_path = Path(__file__).parent / "data_in"
+input_eis_fname = "eis_20150401_162014.data.h5"
 # The DEM data path should contain the .nc files with the DEMs
 dem_path = Path(__file__).parent / "dems"
 # Path where output array and log will be saved
@@ -27,6 +30,8 @@ output_data_path = Path(__file__).parent / "fip_out"
 output_data_path.mkdir(exist_ok=True)
 fip_lines = np.load(input_data_path / "intensities.npy", allow_pickle=True).tolist()
 cont_func_data = readsav(str(input_data_path / "emissivity.sav"))
+
+
 cont_func_temps = np.logspace(4, 8, 401) * u.K
 
 
@@ -119,6 +124,18 @@ for x, y in tqdm.tqdm(zip(xs, ys), total=len(xs)):
     # else I haven't thought of!)
     logging.info(f"Saving mean FIP bias for pixel ({x}, {y})")
     fip_array[x, y] = np.mean(fips)
+    break
 
 # Save array
-np.save(str(output_data_path / "fip_array.npy"), fip_array)
+# np.save(str(output_data_path / "fip_array.npy"), fip_array)
+
+fip_array = np.load(str(output_data_path / "fip_array.npy"))
+# Convert bare array to FITS file
+cube = read_cube(input_data_path / "eis_20150401_162014.data.h5")
+# Use sum_spectra to get the 2D WCS
+wcs = cube.sum_spectra().wcs
+header = wcs.to_header()
+header["DATE-OBS"] = cube.meta["index"]["date_obs"]
+fip_map = Map(fip_array, header)
+
+fip_map.save(input_data_path / "fip_map.fits", overwrite=True)
