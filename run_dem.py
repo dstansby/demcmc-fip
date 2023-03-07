@@ -22,7 +22,7 @@ from fiplib import parse_line, dem_output2xr
 # Number of threads to run in parallel.
 #
 # This should be the same as the number of cores requested from Myriad
-n_threads = 2
+n_threads = 18
 # Setup input and output data paths
 #
 # If not running on Myriad, `input_data_path` and `output_data_path`
