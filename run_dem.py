@@ -33,7 +33,10 @@ n_threads = 18
 #  - `intensities.npy`: File containing observed intensities and intensity errors.
 #
 input_data_path = Path(__file__).parent / "data_in"
-output_data_path = Path(__file__).parent / "new_dems"
+username = "ucasdst"  # UCL username
+scratch = Path(f"/scratch/scratch/{username}") / str(os.environ["JOB_ID"])
+scratch.mkdir(exist_ok=True)
+output_data_path = scratch
 
 # Setup logging
 logging.basicConfig(
