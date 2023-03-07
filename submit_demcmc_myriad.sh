@@ -17,7 +17,7 @@
 #################################
 
 # Request wallclock time (format hours:minutes:seconds).
-#$ -l h_rt=12:00:0
+#$ -l h_rt=24:00:0
 
 # Request RAM (must be an integer followed by M, G, or T)
 #$ -l mem=2G
