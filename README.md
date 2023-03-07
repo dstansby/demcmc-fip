@@ -24,6 +24,9 @@ Running this script will output progress to a log file in the output directory.
 Processing of the DEM for each pixel will happen independently and in parallel.
 When a whole row of pixels is processed the DEMs will be output to a netCDF file called `dem_x.nc`, where x is the number that gives the x-pixel of the row that contains DEMs for all y-pixels.
 
+#### Running on Myriad
+The `submit_demcmc_myriad.sh` script provides a job script to submit the MCMC calculations to [Myriad](https://www.rc.ucl.ac.uk/docs/Clusters/Myriad/).
+
 ### Calculating FIP biases
 `run_fip.py` runs the FIP esitmation, using the DEMs calculated in the previous step.
 The only things that need configuring in this file are the various input/output file path locations.
