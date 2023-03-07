@@ -4,3 +4,5 @@
 *.sav
 *.npy
 *.DS_Store
+*.log
+*.pyc
