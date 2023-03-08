@@ -145,21 +145,19 @@ def calc_dem(params: Tuple[int, int]):
         ycoords_out.append(ypix)
 
     if len(dem_results):
-        xr.concat(dem_results, pd.Index(ycoords_out, name="ypix"))
-        dem_result.save(output_file)
+        all_dems = xr.concat(dem_results, pd.Index(ycoords_out, name="ypix"))
+        temp_edges = dem_results[0].attrs["Temp bin edges"]
+        all_dems.assign_attrs({"Temp bin edges": temp_edges})
+        all_dems.to_netcdf(output_file)
 
 
 if __name__ == "__main__":
     # Get the map shape, and setup the parameters to run for each thread
     map_shape = cont_func_data["emissivity_array"].shape[:2]
-    x, y = np.meshgrid(np.arange(map_shape[0]), np.arange(map_shape[1]))
-    xs, ys = x.ravel(), y.ravel()
-    xys = [(x, y, i, len(xs)) for i, (x, y) in enumerate(zip(xs, ys))]
-
     # Each thread runs at a single x pixel, and runs through all y pixels
     params = [(x, map_shape[1]) for x in np.arange(map_shape[0])]
 
-    logging.info(f"Processing {len(xys)} pixels...")
+    logging.info(f"Processing {len(params)} rows...")
 
     with Pool(n_threads) as p:
         p.map(calc_dem, params)

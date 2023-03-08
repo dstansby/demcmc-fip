@@ -8,10 +8,11 @@ import astropy.units as u
 from eispac import read_cube
 from scipy.io import readsav
 from sunpy.map import Map
+import xarray as xr
 
-from demcmc import DEMOutput, ContFuncDiscrete, EmissionLine
+from demcmc import ContFuncDiscrete, EmissionLine
 
-from fiplib import parse_line
+from fiplib import parse_line, xr2dem_outputs
 
 #################
 # Configuration #
@@ -91,43 +92,48 @@ map_shape = list(fip_lines.values())[0].shape
 xys = np.meshgrid(np.arange(map_shape[0]), np.arange(map_shape[1]))
 fip_array = np.zeros(map_shape) * np.nan
 
-xs, ys = xys[0].ravel(), xys[1].ravel()
-for x, y in tqdm.tqdm(zip(xs, ys), total=len(xs)):
-    fname = dem_path / f"dem_{x}_{y}.nc"
+xs = np.arange(map_shape[0])
+for x in tqdm.tqdm(xs, total=len(xs)):
+    fname = dem_path / f"dem_{x}.nc"
     if not fname.exists():
-        logging.info(f"No DEM file exists for pixel ({x}, {y})")
-        continue
-    dem = DEMOutput.load(fname)
-    lines = get_lines(x, y)
-    if not np.all(np.array([line.intensity_obs for line in lines.values()]) > 0):
-        logging.info(f"Either S or Si intensity is zero for pixel ({x}, {y})")
+        logging.info(f"No DEM file exists for {x=}")
         continue
 
-    # Iterate through all the DEM samples, and calculate the FIP bias
-    # for each sample
-    fips = []
-    for sample in dem.iter_binned_dems():
-        I_pred = lines["Si"].I_pred(sample)
-        if not I_pred > 0:
+    da = xr.load_dataarray(fname)
+    for y, dem in tqdm.tqdm(xr2dem_outputs(da), total=map_shape[1]):
+        lines = get_lines(x, y)
+
+        # Check that Si and S intensities are > 0
+        if not np.all(np.array([line.intensity_obs for line in lines.values()]) > 0):
+            logging.info(f"Either S or Si intensity is zero for pixel ({x}, {y})")
             continue
-        correction = lines["Si"].intensity_obs / I_pred
-        fip = lines["S"].I_pred(sample) / lines["S"].intensity_obs
-        fips.append(fip * correction)
 
-    if not len(fips):
-        logging.info(f"Predicted Si intensities are all zero for pixel ({x}, {y})")
-        continue
+        # Iterate through all the DEM samples, and calculate the FIP bias
+        # for each sample
+        fips = []
+        for sample in dem.iter_binned_dems():
+            # Predict Si intensity from DEM
+            I_pred = lines["Si"].I_pred(sample)
+            if not I_pred > 0:
+                continue
+            correction = lines["Si"].intensity_obs / I_pred
+            fip = lines["S"].I_pred(sample) / lines["S"].intensity_obs
+            fips.append(fip * correction)
 
-    # Take the mean of all the sampled FIP biases. Could take another
-    # measure here (e.g. the median), or save the whole sample set,
-    # or calculate the standard deviation of samples (or something
-    # else I haven't thought of!)
-    logging.info(f"Saving mean FIP bias for pixel ({x}, {y})")
-    fip_array[x, y] = np.mean(fips)
-    break
+        if not len(fips):
+            logging.info(f"Predicted Si intensities are all zero for pixel ({x}, {y})")
+            continue
+
+        # Take the mean of all the sampled FIP biases. Could take another
+        # measure here (e.g. the median), or save the whole sample set,
+        # or calculate the standard deviation of samples (or something
+        # else I haven't thought of!)
+        logging.info(f"Saving mean FIP bias for pixel ({x}, {y})")
+        fip_array[x, y] = np.mean(fips)
+        break
 
 # Save array
-# np.save(str(output_data_path / "fip_array.npy"), fip_array)
+np.save(str(output_data_path / "fip_array.npy"), fip_array)
 
 fip_array = np.load(str(output_data_path / "fip_array.npy"))
 # Convert bare array to FITS file

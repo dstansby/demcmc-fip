@@ -1,8 +1,10 @@
+from typing import Tuple, Generator
+
 import numpy as np
 import xarray as xr
 
-from demcmc.units import u_temp
-from demcmc import DEMOutput
+from demcmc.units import u_temp, u_dem
+from demcmc import DEMOutput, TempBins
 
 
 def parse_line(line: str) -> str:
@@ -31,3 +33,16 @@ def dem_output2xr(dem_out: DEMOutput) -> xr.DataArray:
         attrs={"Temp bin edges": temp_edges.to_value(u_temp)},
     )
     return da
+
+
+def xr2dem_outputs(da: xr.DataArray) -> Generator[Tuple[int, DEMOutput], None, None]:
+    """
+    Convert a loaded DataArray with a row of data to a set of DEMOutput objects,
+    one for each pixel.
+    """
+    for ypix in da.coords["ypix"]:
+        dem_data = da.isel(ypix=ypix)
+        output = DEMOutput()
+        output._temp_bins = TempBins(dem_data.attrs["Temp bin edges"] * u_temp)
+        output._samples = dem_data.data * u_dem
+        yield ypix, output
