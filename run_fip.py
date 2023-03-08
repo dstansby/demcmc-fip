@@ -100,7 +100,7 @@ for x in tqdm.tqdm(xs, total=len(xs)):
         continue
 
     da = xr.load_dataarray(fname)
-    for y, dem in tqdm.tqdm(xr2dem_outputs(da), total=map_shape[1]):
+    for y, dem in xr2dem_outputs(da):
         lines = get_lines(x, y)
 
         # Check that Si and S intensities are > 0
@@ -130,7 +130,6 @@ for x in tqdm.tqdm(xs, total=len(xs)):
         # else I haven't thought of!)
         logging.info(f"Saving mean FIP bias for pixel ({x}, {y})")
         fip_array[x, y] = np.mean(fips)
-        break
 
 # Save array
 np.save(str(output_data_path / "fip_array.npy"), fip_array)
