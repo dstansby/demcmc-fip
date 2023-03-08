@@ -33,10 +33,14 @@ n_threads = 18
 #  - `intensities.npy`: File containing observed intensities and intensity errors.
 #
 input_data_path = Path(__file__).parent / "data_in"
-username = "ucasdst"  # UCL username
-scratch = Path(f"/scratch/scratch/{username}") / str(os.environ["JOB_ID"])
-scratch.mkdir(exist_ok=True)
-output_data_path = scratch
+if 'JOB_ID' in os.environ:
+    # Probably running on Myriad
+    username = "ucasdst"  # UCL username
+    scratch = Path(f"/scratch/scratch/{username}") / str(os.environ["JOB_ID"])
+    scratch.mkdir(exist_ok=True)
+    output_data_path = scratch
+else:
+    output_data_path = Path(__file__).parent / "dems"
 
 # Setup logging
 logging.basicConfig(
