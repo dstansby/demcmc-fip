@@ -91,6 +91,7 @@ def get_lines(xpix: int, ypix: int):
             continue
 
         line_name = parse_line(key)
+        # Only include Iron lines in the DEM estimation
         if "Fe" not in line_name:
             continue
         intensity = fip_lines[key][xpix, ypix]
@@ -102,6 +103,7 @@ def get_lines(xpix: int, ypix: int):
             cont_func,
             intensity_obs=intensity,
             sigma_intensity_obs=error,
+            name=line_name
         )
         lines.append(line)
     return lines
