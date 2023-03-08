@@ -40,8 +40,8 @@ def xr2dem_outputs(da: xr.DataArray) -> Generator[Tuple[int, DEMOutput], None, N
     Convert a loaded DataArray with a row of data to a set of DEMOutput objects,
     one for each pixel.
     """
-    for ypix in da.coords["ypix"]:
-        dem_data = da.isel(ypix=ypix)
+    for ypix in da.coords["ypix"].values:
+        dem_data = da.sel(ypix=ypix)
         output = DEMOutput()
         output._temp_bins = TempBins(dem_data.attrs["Temp bin edges"] * u_temp)
         output._samples = dem_data.data * u_dem
