@@ -6,9 +6,9 @@ It shouldn't be too hard to adapt them to work elsewhere.
 
 ## Ingredients
 To start with you'll need
-- the original EIS `.fits` file.
-- a numpy `.npy` file with fitted intensities and intensity errors across a whole EIS map.
-- a `.sav` file with contribution functions for each of the observed lines.
+- the original EIS observation as data/header h5 files. [eispac](https://eispac.readthedocs.io) has instructions one how to search for and download these.
+- a numpy `.npy` file with fitted intensities and intensity errors across the whole EIS map.
+- a `.sav` file with pre-computed contribution functions for each of the observed lines.
 
 The lines in each of these files need to be a number of Fe lines for calculating the DEM, and the S and Si lines for estimating the FIP bias.
 Put these three files in the same folder, and make a note of that folder for later.

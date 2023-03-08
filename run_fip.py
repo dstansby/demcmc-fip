@@ -143,4 +143,4 @@ header = wcs.to_header()
 header["DATE-OBS"] = cube.meta["index"]["date_obs"]
 fip_map = Map(fip_array, header)
 
-fip_map.save(input_data_path / "fip_map.fits", overwrite=True)
+fip_map.save(output_data_path / "fip_map.fits", overwrite=True)
