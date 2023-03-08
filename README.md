@@ -23,6 +23,8 @@ Then `run_dem.py` runs the DEM calculation. Two things need to be configured at 
 Running this script will output progress to a log file in the output directory.
 Processing of the DEM for each pixel will happen independently and in parallel.
 When a whole row of pixels is processed the DEMs will be output to a netCDF file called `dem_x.nc`, where x is the number that gives the x-pixel of the row that contains DEMs for all y-pixels.
+Additional `dem_x_lines.nc` files will be produced, which give information on what lines were used to calculate the DEM.
+A '1' value means that line was used to calculate the DEM for that pixel.
 
 #### Running on Myriad
 The `submit_demcmc_myriad.sh` script provides a job script to submit the MCMC calculations to [Myriad](https://www.rc.ucl.ac.uk/docs/Clusters/Myriad/).
