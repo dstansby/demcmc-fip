@@ -16,6 +16,9 @@ def parse_line(line: str) -> str:
 
 
 def dem_output2xr(dem_out: DEMOutput) -> xr.DataArray:
+    """
+    Convert the output of a DEM calculation into a DataArray
+    """
     temp_centers = dem_out.temp_bins.bin_centers
     temp_edges = dem_out.temp_bins.edges
 
