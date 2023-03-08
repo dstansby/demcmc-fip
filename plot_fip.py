@@ -2,7 +2,7 @@ from sunpy.map import Map
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolor
 
-fip_map = Map("data_in/fip_map.fits")
+fip_map = Map("fip_out/fip_map.fits")
 fig = plt.figure()
 ax = fig.add_subplot(111, projection=fip_map)
 cmap = plt.get_cmap('RdBu')
