@@ -135,11 +135,14 @@ def calc_dem(params: Tuple[int, int]):
     dem_results = []
     for ypix in ycoords:
         lines = get_lines(xpix, ypix)
-        if not np.all(np.array([line.intensity_obs for line in lines]) > 0):
-            logging.info(f"Skipping pixel ({xpix}, {ypix}), some zero intensities")
+        lines = [line for line in lines if line.intensity_obs > 0]
+        if not len(lines):
+            logging.info(f"Skipping pixel ({xpix}, {ypix}), all zero intensities")
             continue
 
-        logging.info(f"Processing pixel ({xpix}, {ypix})")
+        line_names = [line.name for line in lines]
+
+        logging.info(f"Processing ({xpix}, {ypix}) using {line_names}")
         dem_result = predict_dem_emcee(
             lines, temp_bins, nwalkers=200, nsteps=400, progress=False
         )
