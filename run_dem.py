@@ -137,28 +137,39 @@ def calc_dem(params: Tuple[int, int]):
     # List to save coords that were processed
     ycoords_out = []
     dem_results = []
+    line_masks = []
     for ypix in ycoords:
         lines = get_lines(xpix, ypix)
+        # Save a copy of all the lines available
+        all_line_names = [line.name for line in lines]
+        # Select only lines with > 0 intensity
+        line_mask = [line.intensity_obs > 0 for line in lines]
         lines = [line for line in lines if line.intensity_obs > 0]
         if not len(lines):
             logging.info(f"Skipping pixel ({xpix}, {ypix}), all zero intensities")
             continue
 
-        line_names = [line.name for line in lines]
-
-        logging.info(f"Processing ({xpix}, {ypix}) using {line_names}")
+        logging.info(f"Processing ({xpix}, {ypix})")
         dem_result = predict_dem_emcee(
             lines, temp_bins, nwalkers=200, nsteps=400, progress=False
         )
+
         dem_results.append(dem_output2xr(dem_result))
         ycoords_out.append(ypix)
+        line_masks.append(line_mask)
 
     if len(dem_results):
-        all_dems = xr.concat(dem_results, pd.Index(ycoords_out, name="ypix"))
+        # Save DEMs
+        ycoords_idx = pd.Index(ycoords_out, name="ypix")
+        all_dems = xr.concat(dem_results, ycoords_idx)
         temp_edges = dem_results[0].attrs["Temp bin edges"]
         all_dems.assign_attrs({"Temp bin edges": temp_edges})
         all_dems.to_netcdf(output_file)
-
+        # Save line masks
+        line_masks = np.array(line_masks, dtype=bool).T
+        line_names_idx = pd.Index(all_line_names, name='line')
+        line_masks = xr.DataArray(line_masks, coords=[all_line_names, ycoords_idx])
+        line_masks.to_netcdf(output_data_path / f"dem_{xpix}_lines.nc")
 
 if __name__ == "__main__":
     # Get the map shape, and setup the parameters to run for each thread
