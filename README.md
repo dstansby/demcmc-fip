@@ -32,3 +32,6 @@ The `submit_demcmc_myriad.sh` script provides a job script to submit the MCMC ca
 The only things that need configuring in this file are the various input/output file path locations.
 When you run this a progress bar should pop up in your terminal that shows you how long is left to process all the pixels.
 When the script finishes running it will output a file called `fip_map.fits` in the previously specified output directory.
+
+### Plotting the FIP map
+`plot_fip.py` plots the generated FIP map, using some nice deafult colormap settings.
